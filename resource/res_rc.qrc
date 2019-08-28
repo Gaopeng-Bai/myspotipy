@@ -1,0 +1,26 @@
+<RCC>
+  <qresource prefix="/">
+    <file>Chinese.jpg</file>
+    <file>Crazy boy.jpg</file>
+    <file>当你走了.jpg</file>
+    <file>Crazy_boy.jpg</file>
+    <file>Sleep.jpg</file>
+    <file>Top 50 der Welt.jpg</file>
+  </qresource>
+  <qresource prefix="icon">
+    <file>pause.ico</file>
+    <file>res_rc.qrc</file>
+    <file>thumbdown.ico</file>
+    <file>thumbup.ico</file>
+    <file>volumeoff.ico</file>
+    <file>volumeon.ico</file>
+    <file>previous.png</file>
+    <file>refresh.png</file>
+    <file>next.ico</file>
+    <file>play.ico</file>
+    <file>logo.png</file>
+  </qresource>
+  <qresource prefix="background">
+    <file>background.jpg</file>
+  </qresource>
+</RCC>
