@@ -106,7 +106,7 @@ class Ui_Spotify(object):
         self.playplaylist = QtWidgets.QPushButton(self.frame)
         self.playplaylist.setGeometry(QtCore.QRect(1050, 240, 101, 41))
         self.playplaylist.setStyleSheet("background-color: rgb(85, 170, 0);\n"
-"selection-background-color: rgb(255, 85, 0);")
+                                        "selection-background-color: rgb(255, 85, 0);")
         self.playplaylist.setObjectName("playplaylist")
         self.label_2 = QtWidgets.QLabel(self.frame)
         self.label_2.setGeometry(QtCore.QRect(230, 530, 221, 31))
@@ -121,7 +121,7 @@ class Ui_Spotify(object):
         self.refresher.setMouseTracking(True)
         self.refresher.setAutoFillBackground(False)
         self.refresher.setStyleSheet("border-image: url(:/icon/refresh.png);\n"
-"selection-color: rgb(0, 255, 0);")
+                                     "selection-color: rgb(0, 255, 0);")
         self.refresher.setText("")
         self.refresher.setObjectName("refresher")
         self.frame_2 = QtWidgets.QFrame(self.frame)
@@ -226,7 +226,7 @@ class Ui_Spotify(object):
         self.playlists_details.setFont(font)
         self.playlists_details.setAutoFillBackground(True)
         self.playlists_details.setStyleSheet("background-color: rgb(65, 65, 65);\n"
-"font: 8pt \"Segoe UI\";")
+                                             "font: 8pt \"Segoe UI\";")
         self.playlists_details.setShowGrid(False)
         self.playlists_details.setObjectName("playlists_details")
         self.playlists_details.setColumnCount(0)
@@ -273,4 +273,6 @@ class Ui_Spotify(object):
         self.devices.setShortcut(_translate("Spotify", "F5"))
         self.actionKaishi.setText(_translate("Spotify", "kaishi"))
         self.actionJieshu.setText(_translate("Spotify", "jieshu"))
+
+
 import res_rc

@@ -1,22 +1,50 @@
-import sys,time
-from spotipy.spotify_api import spotify_api
-from GUI.spotify_gui import Ui_Spotify as ui
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
+#!/usr/bin/python3
+# -*-coding:utf-8 -*-
+
+# Reference:**********************************************
+# @Time    : 7/28/2019 3:40 PM
+# @Author  : Gaopeng.Bai
+# @File    : Gui_main.py
+# @User    : baigaopeng
+# @Software: PyCharm
+# Reference:**********************************************
+
+import sys
 import threading
+import time
+
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
+
+from GUI.spotify_gui import Ui_Spotify as ui
+from spotipy.spotify_api import spotify_api, ms_to_time
+from utlis.preprocessing import data_processing
+
+
+def test_function():
+    print("current has %d threads" % (threading.activeCount() - 1))
+
+
+def recommender_system(input_playlist):
+    preprocessing = data_processing()
+
 
 class Gui_main(ui):
+    volume_before_mute: int
+
     def __init__(self, mainwindow):
+        self.volume_mute = False
         self.mainwindow = mainwindow
         self.current_playlist = ''
         self.song_index = 0
         self.songs_num = 0
+        self.current_song_lists = []
         self.my_spotify = spotify_api()
 
     def gui_init(self):
         self.playlists_init()
         self.playlist_contain_init()
-        self.playplaylist_button()
+        self.play_playlist_button()
 
         self.devices_button_init()
 
@@ -24,10 +52,7 @@ class Gui_main(ui):
         self.bottom_volume_button()
         self.bottom_button()
 
-        self.Test.clicked.connect(self.test_function)
-
-    def test_function(self):
-        print("current has %d threads" % (threading.activeCount() - 1))
+        self.Test.clicked.connect(test_function)
 
     def bottom_button(self):
         self.nextsong.clicked.connect(self.play_next_song)
@@ -35,9 +60,8 @@ class Gui_main(ui):
         self.playsong.clicked.connect(self.play_button)
 
     def play_button(self):
-        if hasattr(self,'avaiable'):
+        if hasattr(self, 'avaiable'):
             self.playing = not self.playing
-
             if self.playing:
                 self.playsong.setStyleSheet("border-image: url(:/icon/pause.ico);")
                 self.remote_play()
@@ -54,27 +78,25 @@ class Gui_main(ui):
 
     def play_prev_song(self):
         if self.song_index < 0:
-            self.song_index = self.songs_num-1
+            self.song_index = self.songs_num - 1
         else:
             self.song_index -= 1
         self.remote_play()
 
     def play_next_song(self):
-        if self.song_index > self.songs_num-1:
+        if self.song_index > self.songs_num - 1:
             self.song_index = 0
         else:
             self.song_index += 1
         self.remote_play()
 
     def bottom_volume_button(self):
-        self.volume_mute= False
         self.volume.setToolTip('Press mute')
 
         self.volume.clicked.connect(self.volume_button_clicked)
 
-
     def volume_button_clicked(self):
-        if hasattr(self,'avaiable'):
+        if hasattr(self, 'avaiable'):
             self.volume_mute = not self.volume_mute
 
             if self.volume_mute:
@@ -91,7 +113,6 @@ class Gui_main(ui):
         else:
             QMessageBox.warning(None, 'No valid devices', 'Please open your devices')
 
-
     def bottom_volume_control(self):
         self.volumevalue.setMinimum(0)
         self.volumevalue.setMaximum(100)
@@ -102,7 +123,7 @@ class Gui_main(ui):
         self.volumevalue.valueChanged.connect(self.volume_value_event)
 
     def volume_value_event(self):
-        if hasattr(self,'avaiable'):
+        if hasattr(self, 'avaiable'):
             self.my_spotify.volume_change(self.volumevalue.value())
             self.volume_pertg.setText(str(self.volumevalue.value()))
         else:
@@ -115,46 +136,45 @@ class Gui_main(ui):
             self.Songname.setText(self.my_spotify.current_playing_information['song_name'])
             self.songauther.setText(self.my_spotify.current_playing_information['artists'])
             self.fulltimeofsong.setText(
-                self.my_spotify.ms_to_time(self.my_spotify.current_playing_information['duration_ms']))
+                ms_to_time(self.my_spotify.current_playing_information['duration_ms']))
             self.progressinsong.setText(
-                self.my_spotify.ms_to_time(self.my_spotify.current_playing_information['progress_ms']))
+                ms_to_time(self.my_spotify.current_playing_information['progress_ms']))
             # image fill ?
-            
+
             self.progress_bar_with_timer()
             self.play_button_set()
         except TypeError:
             QMessageBox.warning(None, 'Bottom init error', 'No playing on the device')
 
-
     def progress_bar_with_timer(self):
         progress = int(self.my_spotify.current_playing_information['progress_ms'])
         duration = int(self.my_spotify.current_playing_information['duration_ms'])
 
-        step = int((duration/1000)/100)
-        current_position = (progress/duration)*100
+        step = int((duration / 1000) / 100)
+        current_position = (progress / duration) * 100
         self.progressofsong.setMinimum(0)
         self.progressofsong.setMaximum(100)
-        self.progressofsong.setSingleStep(step)# %song duration time
+        self.progressofsong.setSingleStep(step)  # %song duration time
         self.progressofsong.setValue(current_position)
 
-
-        playback_thread = threading.Thread(name='timer_set', target=self.sync_timer_progress_bar, args=(progress, duration))
+        playback_thread = threading.Thread(name='timer_set', target=self.sync_timer_progress_bar,
+                                           args=(progress, duration))
         playback_thread.start()
 
-    def sync_timer_progress_bar(self, progress_ms,duration_ms):
+    def sync_timer_progress_bar(self, progress_ms, duration_ms):
         while duration_ms > progress_ms:
             time.sleep(1)
-            progress_ms= progress_ms+1000
-            self.progressinsong.setText(self.my_spotify.ms_to_time(progress_ms))
-            self.progressofsong.setValue(int((progress_ms/duration_ms)*100))
+            progress_ms = progress_ms + 1000
+            self.progressinsong.setText(ms_to_time(progress_ms))
+            self.progressofsong.setValue(int((progress_ms / duration_ms) * 100))
 
-    def playplaylist_button(self):
+    def play_playlist_button(self):
         self.playplaylist.setToolTip('Play current playlist')
         self.playplaylist.clicked.connect(self.remote_play)
 
     def remote_play(self):
         if self.current_playlist:
-            uri= self.my_spotify.playlists['uri'][self.my_spotify.playlists['name'].index(self.current_playlist)]
+            uri = self.my_spotify.playlists['uri'][self.my_spotify.playlists['name'].index(self.current_playlist)]
 
             if hasattr(self, 'avaiable'):
                 playback_thread = threading.Thread(name='play_playlist', target=self.my_spotify.play_playlist,
@@ -185,11 +205,11 @@ class Gui_main(ui):
     def playlist_clicked(self, item):
         self.my_spotify.get_playlists_detials(item.text())
 
-        self.current_playlist=item.text()
+        self.current_playlist = item.text()
         self.nameofplaylist.setText(self.my_spotify.container['name'])
         self.Nameofauther.setText(self.my_spotify.container['owner'])
         self.numberofsongs.setText(str(self.my_spotify.container['total']))
-        self.logoplaylist.setStyleSheet("border-image: url(:/"+item.text()+".jpg);")
+        self.logoplaylist.setStyleSheet("border-image: url(:/" + item.text() + ".jpg);")
         self.fill_playlist_detials()
 
     def fill_playlist_detials(self):
@@ -197,26 +217,30 @@ class Gui_main(ui):
         self.playlists_details.clearContents()
         self.songs_num = len(self.my_spotify.container['song_name'])
         self.playlists_details.setRowCount(self.songs_num)
-        for i,item in enumerate(self.my_spotify.container['song_name']):
+        for i, item in enumerate(self.my_spotify.container['song_name']):
             title = QTableWidgetItem(item)
             name = QTableWidgetItem(self.my_spotify.container['artist'][i])
             time = QTableWidgetItem(self.my_spotify.container['time'][i])
+            self.current_song_lists.append(self.my_spotify.container['song_uri'][i])
             title.setForeground(QBrush(QColor(255, 255, 255)))
             name.setForeground(QBrush(QColor(255, 255, 255)))
             time.setForeground(QBrush(QColor(255, 255, 255)))
             self.playlists_details.setItem(i, 0, title)
             self.playlists_details.setItem(i, 1, name)
             self.playlists_details.setItem(i, 2, time)
-
+        # fill recommendation area
         self.playlists_details.itemDoubleClicked.connect(self.play)
 
-    def play(self,item):
-
+    def play(self, item):
+        """
+        Remote play songs follow the current item
+        @param item:
+        @return:
+        """
         self.song_index = int(item.row())
         self.remote_play()
 
-
-    #devices button
+    # devices button
     def devices_button_init(self):
         self.devices.setToolTip('Click to get your devices')
         self.devices.setPopupMode(QToolButton.MenuButtonPopup)
@@ -233,10 +257,10 @@ class Gui_main(ui):
             menu.addAction(self.avaiable)
         self.devices.setMenu(menu)
         if hasattr(self, 'avaiable'):
-            #set default devices as computer
+            # set default devices as computer
             if 'Computer' in self.my_spotify.devices['devices_name']:
-                 self.my_spotify.choice_device('Computer')
-                 self.gui_bottom_init()
+                self.my_spotify.choice_device('Computer')
+                self.gui_bottom_init()
 
             self.avaiable.triggered.connect(self.device_choice_click)
             self.devices.setToolTip('Choice device, Computer as default')

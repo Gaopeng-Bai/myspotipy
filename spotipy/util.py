@@ -1,4 +1,3 @@
-
 # shows a user's playlists (need to be authenticated via oauth)
 
 from __future__ import print_function
@@ -6,10 +5,11 @@ import os
 from . import oauth2
 import spotipy
 
-def prompt_for_user_token(username, scope=None, client_id = None,
-        client_secret = None, redirect_uri = None, cache_path = None):
-    ''' prompts the user to login if necessary and returns
-        the user token suitable for use with the spotipy.Spotify 
+
+def prompt_for_user_token(username, scope=None, client_id=None,
+                          client_secret=None, redirect_uri=None, cache_path=None):
+    """ prompts the user to login if necessary and returns
+        the user token suitable for use with the spotipy.Spotify
         constructor
 
         Parameters:
@@ -21,7 +21,7 @@ def prompt_for_user_token(username, scope=None, client_id = None,
          - redirect_uri - the redirect URI of your app
          - cache_path - path to location to save tokens
 
-    '''
+    """
 
     if not client_id:
         client_id = os.getenv('SPOTIPY_CLIENT_ID')
@@ -47,8 +47,8 @@ def prompt_for_user_token(username, scope=None, client_id = None,
         raise spotipy.SpotifyException(550, -1, 'no credentials set')
 
     cache_path = cache_path or ".cache-" + username
-    sp_oauth = oauth2.SpotifyOAuth(client_id, client_secret, redirect_uri, 
-        scope=scope, cache_path=cache_path)
+    sp_oauth = oauth2.SpotifyOAuth(client_id, client_secret, redirect_uri,
+                                   scope=scope, cache_path=cache_path)
 
     # try to get a valid token for this user, from the cache,
     # if not in the cache, the create a new (this will send
@@ -82,7 +82,7 @@ def prompt_for_user_token(username, scope=None, client_id = None,
             response = input("Enter the URL you were redirected to: ")
 
         print()
-        print() 
+        print()
 
         code = sp_oauth.parse_response_code(response)
         token_info = sp_oauth.get_access_token(code)
