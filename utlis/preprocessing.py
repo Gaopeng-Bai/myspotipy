@@ -121,8 +121,9 @@ class data_processing:
             # random choice tasks size item.
             x_out.append([x[i] for i in seq])
             y_out.append([y[i] for i in seq])
+            x_labels = y_out[-1:] + y_out[:-1]
 
-        return np.array(x_out), np.array(y_out)
+        return np.array(x_out), np.array(x_labels), np.array(y_out)
 
     def standardization(self, playlist):
         new_list = []

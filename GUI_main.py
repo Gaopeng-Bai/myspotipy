@@ -30,6 +30,7 @@ def recommender_system(input_playlist):
 
 
 class Gui_main(ui):
+    playing: bool
     volume_before_mute: int
 
     def __init__(self, mainwindow):
