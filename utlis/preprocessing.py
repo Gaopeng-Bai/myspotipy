@@ -56,12 +56,11 @@ class data_processing:
 
     def playlist_processing(self, playlist):
         """
-        pre processing the playlist, convert song url to specify ids,
-        update dictionary if ids not exist.
+        The playlist is preprocessed, the song is converted to a specified ID,
+        and if the id does not exist, the dictionary is updated.
         @param playlist: the song list of current playlist
         @return: List of playlist ids.
         """
-
         with open(self.vocab2id_file, 'rb') as f:
             vocab = cPickle.load(f)
         self.vocabulary_size = len(vocab)
@@ -87,6 +86,12 @@ class data_processing:
         return list(map(word2id.get, self.current_playlist))
 
     def fetch_batch(self, playlist):
+        """
+        Reshape a batch by using current sequence of playlist.
+        The elements of playlist much be lager than (self.task_size+2)
+        @param playlist: current sequence of playlist.
+        @return: x, x_lable, y for model.
+        """
         y_output = []
         y_out = []
         x_out = []
@@ -116,16 +121,21 @@ class data_processing:
                 # duplicate list
                 x = [a for item in x for a in repeat(item, 2)]
                 y = [b for item in y for b in repeat(item, 2)]
-            seq = np.random.randint(0, len(y), self.tasks_size)
 
-            # random choice tasks size item.
-            x_out.append([x[i] for i in seq])
-            y_out.append([y[i] for i in seq])
+            # choice tasks size item.
+            y_out.append(y[-self.tasks_size:])
+            x_out.append(x[-self.tasks_size:])
             x_labels = y_out[-1:] + y_out[:-1]
 
         return np.array(x_out), np.array(x_labels), np.array(y_out)
 
     def standardization(self, playlist):
+        """
+        convert each value to 0-1 number. normalization algorithm: Linear transformation.
+         y=(x-min)/(max-min).
+        @param playlist: input a playlist.
+        @return: normalized value list.
+        """
         new_list = []
         for i in playlist:
             new_list.append(i / self.vocabulary_size)

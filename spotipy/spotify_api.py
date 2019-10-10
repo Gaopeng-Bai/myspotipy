@@ -45,6 +45,8 @@ def download_image(image_url, name):
 
 
 class spotify_api:
+    final_devices_id: object
+    devices: Dict[str, List[Any]]
     current_playing_information: Dict[str, Union[str, Any]]
     token: Optional[Any]
     username: object
@@ -86,7 +88,11 @@ class spotify_api:
         self.show_available_device()
 
     def get_playlists_detials(self, playlist_name):
-
+        """
+        put relevant information into local container from user database.
+        @param playlist_name: playlist url in spotify.
+        @return: not defined.
+        """
         self.container_init()
         playlists = self.sp.user_playlists(self.username)
         for list in playlists['items']:
@@ -117,6 +123,10 @@ class spotify_api:
                     self.container['song_image'].append(image['url'])
 
     def get_playlists(self):
+        """
+        get all playlists from spotify user database.
+        @return:
+        """
         self.sp = spotipy.Spotify(auth=self.token)
         self.sp.trace = False
         playlists = self.sp.user_playlists(self.username)
@@ -135,11 +145,18 @@ class spotify_api:
         return analysis, features
 
     def check_devices(self):
+        """
+        get all available devices.
+        @return: the list of devices id.
+        """
         return self.sp.devices()
 
     def show_available_device(self):
+        """
+        store all available devices info into local parameters.
+        @return:
+        """
         self.devices = {'devices_name': [], 'devices_id': []}
-
         mydevice = self.check_devices()
         for ids in mydevice['devices']:
             self.devices['devices_name'].append(ids['type'])
@@ -152,11 +169,15 @@ class spotify_api:
             print('No valid devices')
 
     def volume_change(self, value):
+        """
+        remote control volume by specify the value.
+        @param value: the volume value (0-100)
+        @return: not defined.
+        """
         self.sp.volume(value, device_id=self.final_devices_id)
 
     # device: Smartphone, Computer
     def play_song(self, specific_uri):
-
         self.sp.start_playback(device_id=self.final_devices_id, uris=[specific_uri])
         print('playing')
 
@@ -167,6 +188,10 @@ class spotify_api:
         self.sp.pause_playback(device_id=self.final_devices_id)
 
     def current_playing_info(self):
+        """
+        get current playing song information and store into local parameters.
+        @return:
+        """
         self.current_playing_information = {}
         sum_artist = ''
 
