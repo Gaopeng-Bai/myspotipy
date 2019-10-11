@@ -99,6 +99,7 @@ class data_processing:
         data = self.playlist_processing(playlist)
         playlist = self.standardization(data)
 
+        # manage a batch table for next step
         for i in range(len(playlist) - 2):
             x = []
             y = playlist[i + 1]
@@ -114,7 +115,7 @@ class data_processing:
                 x_array = np.insert(x_array, len(x_array), np.array(x[0]), axis=0)
 
             y_output.append(one_hot_encode(int(y * self.vocabulary_size), self.vocabulary_size))
-
+        # fetch mini-batch from batch table.
         for i in range(self.batch_size):
             x, y = x_array[1:, :], np.array(y_output)
             while len(x) < self.tasks_size:
@@ -125,9 +126,12 @@ class data_processing:
             # choice tasks size item.
             y_out.append(y[-self.tasks_size:])
             x_out.append(x[-self.tasks_size:])
-            x_labels = y_out[-1:] + y_out[:-1]
 
-        return np.array(x_out), np.array(x_labels), np.array(y_out)
+        x_labels = np.concatenate(
+            [np.zeros(shape=[self.batch_size, 1, self.seq_length]), np.array(y_out)[:, :-1, :]], axis=1
+        )
+
+        return np.array(x_out), x_labels, np.array(y_out)
 
     def standardization(self, playlist):
         """
