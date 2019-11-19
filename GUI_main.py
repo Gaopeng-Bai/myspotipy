@@ -25,10 +25,6 @@ def test_function():
     print("current has %d threads" % (threading.activeCount() - 1))
 
 
-def recommender_system(input_playlist):
-    preprocessing = data_processing()
-
-
 class Gui_main(ui):
     playing: bool
     volume_before_mute: int
@@ -230,6 +226,9 @@ class Gui_main(ui):
             self.playlists_details.setItem(i, 1, name)
             self.playlists_details.setItem(i, 2, time)
         # fill recommendation area
+        # recommendation system.
+        recommender_thread = threading.Thread(name='recommender', target=self.recommender_system)
+        recommender_thread.start()
         self.playlists_details.itemDoubleClicked.connect(self.play)
 
     def play(self, item):
@@ -271,6 +270,11 @@ class Gui_main(ui):
     def device_choice_click(self):
         self.my_spotify.choice_device(self.avaiable.text())
         self.gui_bottom_init()
+
+    def recommender_system(self):
+        preprocessing = data_processing()
+        x, x_label, y = preprocessing.fetch_batch(self.current_song_lists)
+        print(x, x_label)
 
 
 if __name__ == '__main__':

@@ -275,4 +275,4 @@ class Ui_Spotify(object):
         self.actionJieshu.setText(_translate("Spotify", "jieshu"))
 
 
-import res_rc
+import resource.res_rc

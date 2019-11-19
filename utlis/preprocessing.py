@@ -38,7 +38,7 @@ class data_processing:
     vocab: Optional[Any]
     vocabulary_size: int
 
-    def __init__(self, save_dir='../data_resources/save_data', seq_length=50, batch_size=2, tasks_size=16):
+    def __init__(self, save_dir='../data_resources/save_data', seq_length=50, batch_size=8, tasks_size=16):
         self.vocab2id_file = os.path.join(save_dir, "vocab2id", "vocab.pkl")
         self.id2vocab_file = os.path.join(save_dir, "id2word", "vocab.pkl")
 
@@ -128,7 +128,7 @@ class data_processing:
             x_out.append(x[-self.tasks_size:])
 
         x_labels = np.concatenate(
-            [np.zeros(shape=[self.batch_size, 1, self.seq_length]), np.array(y_out)[:, :-1, :]], axis=1
+            [np.zeros(shape=[self.batch_size, 1, self.vocabulary_size]), np.array(y_out)[:, :-1, :]], axis=1
         )
 
         return np.array(x_out), x_labels, np.array(y_out)
