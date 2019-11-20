@@ -21,10 +21,6 @@ from spotipy.spotify_api import spotify_api, ms_to_time
 from utlis.preprocessing import data_processing
 
 
-def test_function():
-    print("current has %d threads" % (threading.activeCount() - 1))
-
-
 class Gui_main(ui):
     playing: bool
     volume_before_mute: int
@@ -49,7 +45,7 @@ class Gui_main(ui):
         self.bottom_volume_button()
         self.bottom_button()
 
-        self.Test.clicked.connect(test_function)
+        self.Test.clicked.connect(self.test_function)
 
     def bottom_button(self):
         self.nextsong.clicked.connect(self.play_next_song)
@@ -207,9 +203,9 @@ class Gui_main(ui):
         self.Nameofauther.setText(self.my_spotify.container['owner'])
         self.numberofsongs.setText(str(self.my_spotify.container['total']))
         self.logoplaylist.setStyleSheet("border-image: url(:/" + item.text() + ".jpg);")
-        self.fill_playlist_detials()
+        self.fill_playlist_details()
 
-    def fill_playlist_detials(self):
+    def fill_playlist_details(self):
 
         self.playlists_details.clearContents()
         self.songs_num = len(self.my_spotify.container['song_name'])
@@ -274,7 +270,10 @@ class Gui_main(ui):
     def recommender_system(self):
         preprocessing = data_processing()
         x, x_label, y = preprocessing.fetch_batch(self.current_song_lists)
-        print(x, x_label)
+
+    def test_function(self):
+        self.my_spotify.finding_song_by_track("spotify:track:2vCtiBvJJZfz773yTfAxPP")
+        print("current has %d threads" % (threading.activeCount() - 1))
 
 
 if __name__ == '__main__':
