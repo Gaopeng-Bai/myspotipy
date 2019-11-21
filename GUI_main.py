@@ -315,8 +315,8 @@ class Gui_main(ui):
 
     def recommendation_system(self):
         """
-        preprocessing the current list of songs for recommender system. put all content of recommended list into frontend.
-        connect each song to play button to play the recommended song.
+        preprocessing the current list of songs for recommender system. put all content of recommended list into
+        frontend. connect each song to play button to play the recommended song.
         :return: None
         """
         self.preprocessing.init_container()
