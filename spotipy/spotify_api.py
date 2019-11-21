@@ -193,12 +193,15 @@ class spotify_api:
         :param track_id: Details of the track ID of the song to be searched
         :return: a dic of self.recommender_songs contain the content of recommendation
         """
-        temp = self.sp.track(track_id)
+        temp = self.sp.tracks(track_id)
         self.recommender_songs = {"song_name": [], "artist_name": [], "duration_time": []}
-        for i in temp:
+        for i in temp["tracks"]:
             self.recommender_songs["song_name"].append(i["name"])
             self.recommender_songs["artist_name"].append(i["artists"][0]["name"])
             self.recommender_songs["duration_time"].append(ms_to_time(i["duration_ms"]))
+
+    def seek_to_position(self, position):
+        self.sp.seek_track(position)
 
     def current_playing_info(self):
         """

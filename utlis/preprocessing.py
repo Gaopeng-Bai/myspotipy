@@ -38,7 +38,7 @@ class data_processing:
     vocab: Optional[Any]
     vocabulary_size: int
 
-    def __init__(self, save_dir='../data_resources/save_data', seq_length=50, batch_size=8, tasks_size=16):
+    def __init__(self, save_dir='../data_resources/save_data', seq_length=50, batch_size=4, tasks_size=10):
         self.vocab2id_file = os.path.join(save_dir, "vocab2id", "vocab.pkl")
         self.id2vocab_file = os.path.join(save_dir, "id2word", "vocab.pkl")
 
@@ -63,7 +63,8 @@ class data_processing:
         """
         with open(self.vocab2id_file, 'rb') as f:
             vocab = cPickle.load(f)
-        self.vocabulary_size = len(vocab)
+        vocabulary_size = len(vocab)
+        self.stable_size = vocabulary_size
         word2id = dict(zip(vocab.keys(), vocab.values()))
 
         for i in playlist:
@@ -71,17 +72,18 @@ class data_processing:
             # check dictionary to update
             # if not in dictionary, store index idCount+1
             if word2id.get(i[14:]) is None:
-                self.vocabulary_size += 1
-                word2id[i[14:]] = self.vocabulary_size
+                # vocabulary_size += 1
+                # word2id[i[14:]] = vocabulary_size
+                word2id[i[14:]] = 0
 
         # put char into dictionary random sort
         word2id = dict(zip(word2id.keys(), word2id.values()))
         self.id2word = dict(zip(word2id.values(), word2id.keys()))
         # store new dictionary into local files.
-        with open(self.vocab2id_file, 'wb') as f:
-            cPickle.dump(word2id, f)
-        with open(self.id2vocab_file, 'wb') as f:
-            cPickle.dump(self.id2word, f)
+        # with open(self.vocab2id_file, 'wb') as f:
+        #     cPickle.dump(word2id, f)
+        # with open(self.id2vocab_file, 'wb') as f:
+        #     cPickle.dump(self.id2word, f)
 
         return list(map(word2id.get, self.current_playlist))
 
@@ -90,7 +92,7 @@ class data_processing:
         Reshape a batch by using current sequence of playlist.
         The elements of playlist much be lager than (self.task_size+2)
         @param playlist: current sequence of playlist.
-        @return: x, x_lable, y for model.
+        @return: x, x_label, y for model.
         """
         y_output = []
         y_out = []
@@ -114,7 +116,7 @@ class data_processing:
                     x[0].append(-1)
                 x_array = np.insert(x_array, len(x_array), np.array(x[0]), axis=0)
 
-            y_output.append(one_hot_encode(int(y * self.vocabulary_size), self.vocabulary_size))
+            y_output.append(one_hot_encode(int(y * self.stable_size), self.stable_size))
         # fetch mini-batch from batch table.
         for i in range(self.batch_size):
             x, y = x_array[1:, :], np.array(y_output)
@@ -128,7 +130,7 @@ class data_processing:
             x_out.append(x[-self.tasks_size:])
 
         x_labels = np.concatenate(
-            [np.zeros(shape=[self.batch_size, 1, self.vocabulary_size]), np.array(y_out)[:, :-1, :]], axis=1
+            [np.zeros(shape=[self.batch_size, 1, self.stable_size]), np.array(y_out)[:, :-1, :]], axis=1
         )
 
         return np.array(x_out), x_labels, np.array(y_out)
@@ -142,5 +144,5 @@ class data_processing:
         """
         new_list = []
         for i in playlist:
-            new_list.append(i / self.vocabulary_size)
+            new_list.append(i / self.stable_size)
         return new_list

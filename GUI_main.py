@@ -19,6 +19,7 @@ from PyQt5.QtWidgets import *
 from GUI.spotify_gui import Ui_Spotify as ui
 from spotipy.spotify_api import spotify_api, ms_to_time
 from utlis.preprocessing import data_processing
+from recommeder_system.recommendation import recommendation
 
 
 class Gui_main(ui):
@@ -33,12 +34,14 @@ class Gui_main(ui):
         self.songs_num = 0
         self.current_song_lists = []
         self.my_spotify = spotify_api()
+        self.preprocessing = data_processing()
+        self.recommender_ = recommendation()
 
     def gui_init(self):
         self.playlists_init()
         self.playlist_contain_init()
+        self.recommendation_contain_init()
         self.play_playlist_button()
-
         self.devices_button_init()
 
         self.bottom_volume_control()
@@ -46,13 +49,48 @@ class Gui_main(ui):
         self.bottom_button()
 
         self.Test.clicked.connect(self.test_function)
+        self.refresher.clicked.connect(self.recommendation_system)
 
     def bottom_button(self):
+        """
+        initialize bottom button.
+        :return:
+        """
         self.nextsong.clicked.connect(self.play_next_song)
         self.previous_song.clicked.connect(self.play_prev_song)
         self.playsong.clicked.connect(self.play_button)
+        self.thumbdown.clicked.connect(self.positive_recommender)
+        self.thumbup.clicked.connect(self.negative_recommender)
+
+    def positive_recommender(self):
+        temp = self.my_spotify.current_playing_information['song_uri']
+        if self.current_song_lists is not None:
+            if temp is not None:
+                self.current_song_lists.append(temp)
+            else:
+                QMessageBox.about(None, 'No playing info', 'Please play a song and press this button again')
+        else:
+            QMessageBox.about(None, 'No playlist', 'Please choose a playlist first')
+
+        QMessageBox.about(None, 'Positive feedback', 'Please press refresh button')
+
+    def negative_recommender(self):
+        temp = self.my_spotify.current_playing_information['song_uri']
+        if self.current_song_lists is not None:
+            if temp is not None:
+                self.current_song_lists.append(temp)
+            else:
+                QMessageBox.about(None, 'No playing info', 'Please play a song and press this button again')
+        else:
+            QMessageBox.about(None, 'No playlist', 'Please choose a playlist first')
+
+        QMessageBox.about(None, 'Positive feedback', 'Please press refresh button')
 
     def play_button(self):
+        """
+        Play current song operation
+        :return:
+        """
         if hasattr(self, 'avaiable'):
             self.playing = not self.playing
             if self.playing:
@@ -63,7 +101,7 @@ class Gui_main(ui):
                 # kill thread of progress bar
                 self.playsong.setStyleSheet("border-image: url(:/icon/play.ico);")
         else:
-            QMessageBox.warning(None, 'No valid devices', 'Please open your devices')
+            QMessageBox.about(None, 'No valid devices', 'Please open your devices')
 
     def play_button_set(self):
         self.playsong.setStyleSheet("border-image: url(:/icon/pause.ico);")
@@ -141,25 +179,32 @@ class Gui_main(ui):
 
     def progress_bar_with_timer(self):
         progress = int(self.my_spotify.current_playing_information['progress_ms'])
-        duration = int(self.my_spotify.current_playing_information['duration_ms'])
+        self.duration = int(self.my_spotify.current_playing_information['duration_ms'])
 
-        step = int((duration / 1000) / 100)
-        current_position = (progress / duration) * 100
+        step = int((self.duration / 1000) / 100)
+        current_position = (progress / self.duration) * 100
         self.progressofsong.setMinimum(0)
         self.progressofsong.setMaximum(100)
         self.progressofsong.setSingleStep(step)  # %song duration time
         self.progressofsong.setValue(current_position)
 
-        playback_thread = threading.Thread(name='timer_set', target=self.sync_timer_progress_bar,
-                                           args=(progress, duration))
+        self.progressofsong.sliderMoved.connect(self.jump_timer)
+
+        playback_thread = threading.Thread(name='timer_set', target=self.sync_timer_progress_bar)
         playback_thread.start()
 
-    def sync_timer_progress_bar(self, progress_ms, duration_ms):
-        while duration_ms > progress_ms:
-            time.sleep(1)
-            progress_ms = progress_ms + 1000
+    def jump_timer(self):
+        position = self.progressofsong.value()
+        self.my_spotify.seek_to_position(int(position/100*self.duration))
+
+    def sync_timer_progress_bar(self):
+        while 1:
+            self.my_spotify.current_playing_info()
+            progress_ms = self.my_spotify.current_playing_information['progress_ms']
+            if progress_ms == 0:
+                self.gui_bottom_init()
             self.progressinsong.setText(ms_to_time(progress_ms))
-            self.progressofsong.setValue(int((progress_ms / duration_ms) * 100))
+            self.progressofsong.setValue(int((progress_ms / self.duration) * 100))
 
     def play_playlist_button(self):
         self.playplaylist.setToolTip('Play current playlist')
@@ -195,6 +240,18 @@ class Gui_main(ui):
         self.playlists_details.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.playlists_details.setSelectionBehavior(QAbstractItemView.SelectRows)
 
+    def recommendation_contain_init(self):
+        # init the contents of playlist display
+        self.Recommender.setColumnCount(3)
+        self.Recommender.verticalHeader().setVisible(False)
+        self.Recommender.setStyleSheet("QHeaderView::section{Background-color:rgb(0,1,1)}")
+        self.Recommender.setHorizontalHeaderLabels(['Title', 'Artist', 'Time'])
+        self.Recommender.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.Recommender.resizeColumnsToContents()
+        self.Recommender.resizeRowsToContents()
+        self.Recommender.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.Recommender.setSelectionBehavior(QAbstractItemView.SelectRows)
+
     def playlist_clicked(self, item):
         self.my_spotify.get_playlists_detials(item.text())
 
@@ -206,7 +263,6 @@ class Gui_main(ui):
         self.fill_playlist_details()
 
     def fill_playlist_details(self):
-
         self.playlists_details.clearContents()
         self.songs_num = len(self.my_spotify.container['song_name'])
         self.playlists_details.setRowCount(self.songs_num)
@@ -221,20 +277,8 @@ class Gui_main(ui):
             self.playlists_details.setItem(i, 0, title)
             self.playlists_details.setItem(i, 1, name)
             self.playlists_details.setItem(i, 2, time)
-        # fill recommendation area
-        # recommendation system.
-        recommender_thread = threading.Thread(name='recommender', target=self.recommender_system)
-        recommender_thread.start()
-        self.playlists_details.itemDoubleClicked.connect(self.play)
 
-    def play(self, item):
-        """
-        Remote play songs follow the current item
-        @param item:
-        @return:
-        """
-        self.song_index = int(item.row())
-        self.remote_play()
+        self.playlists_details.itemDoubleClicked.connect(self.play)
 
     # devices button
     def devices_button_init(self):
@@ -265,11 +309,44 @@ class Gui_main(ui):
 
     def device_choice_click(self):
         self.my_spotify.choice_device(self.avaiable.text())
+        # current playlist initializer
+
         self.gui_bottom_init()
 
-    def recommender_system(self):
-        preprocessing = data_processing()
-        x, x_label, y = preprocessing.fetch_batch(self.current_song_lists)
+    def recommendation_system(self):
+        """
+        preprocessing the current list of songs for recommender system. put all content of recommended list into frontend.
+        connect each song to play button to play the recommended song.
+        :return: None
+        """
+        self.preprocessing.init_container()
+        x, x_label, y = self.preprocessing.fetch_batch(self.current_song_lists)
+        recommendation_list = self.recommender_.MANN_predict(x, x_label)
+        self.my_spotify.finding_song_by_track(recommendation_list)
+        # fill the gui for recommendation list
+        self.Recommender.clearContents()
+        count = len(self.my_spotify.recommender_songs["song_name"])
+        self.Recommender.setRowCount(count)
+        for i, item in enumerate(self.my_spotify.recommender_songs["song_name"]):
+            title = QTableWidgetItem(item)
+            name = QTableWidgetItem(self.my_spotify.recommender_songs["artist_name"][i])
+            time = QTableWidgetItem(self.my_spotify.recommender_songs["song_name"][i])
+            title.setForeground(QBrush(QColor(255, 255, 255)))
+            name.setForeground(QBrush(QColor(255, 255, 255)))
+            time.setForeground(QBrush(QColor(255, 255, 255)))
+            self.Recommender.setItem(i, 0, title)
+            self.Recommender.setItem(i, 1, name)
+            self.Recommender.setItem(i, 2, time)
+        self.Recommender.itemDoubleClicked.connect(self.play)
+
+    def play(self, item):
+        """
+        Remote play songs follow the current item
+        @param item:
+        @return:
+        """
+        self.song_index = int(item.row())
+        self.remote_play()
 
     def test_function(self):
         self.my_spotify.finding_song_by_track("spotify:track:2vCtiBvJJZfz773yTfAxPP")
