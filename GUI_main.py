@@ -63,28 +63,26 @@ class Gui_main(ui):
         self.thumbup.clicked.connect(self.negative_recommender)
 
     def positive_recommender(self):
-        temp = self.my_spotify.current_playing_information['song_uri']
-        if self.current_song_lists is not None:
-            if temp is not None:
-                self.current_song_lists.append(temp)
+        self.my_spotify.current_playing_info()
+        if self.current_song_lists:
+            if self.my_spotify.current_playing_information['song_uri'] is not None:
+                self.current_song_lists.append(self.my_spotify.current_playing_information['song_uri'])
+                QMessageBox.about(None, 'Positive feedback', 'Please press refresh button')
             else:
                 QMessageBox.about(None, 'No playing info', 'Please play a song and press this button again')
         else:
             QMessageBox.about(None, 'No playlist', 'Please choose a playlist first')
-
-        QMessageBox.about(None, 'Positive feedback', 'Please press refresh button')
 
     def negative_recommender(self):
-        temp = self.my_spotify.current_playing_information['song_uri']
-        if self.current_song_lists is not None:
-            if temp is not None:
-                self.current_song_lists.append(temp)
+        self.my_spotify.current_playing_info()
+        if self.current_song_lists:
+            if self.my_spotify.current_playing_information['song_uri'] is not None:
+                # current song never appear again.
+                QMessageBox.about(None, 'Negative feedback', 'This song never appear again')
             else:
                 QMessageBox.about(None, 'No playing info', 'Please play a song and press this button again')
         else:
             QMessageBox.about(None, 'No playlist', 'Please choose a playlist first')
-
-        QMessageBox.about(None, 'Positive feedback', 'Please press refresh button')
 
     def play_button(self):
         """
