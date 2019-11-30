@@ -193,9 +193,10 @@ class spotify_api:
         :return: a dic of self.recommender_songs contain the content of recommendation
         """
         temp = self.sp.tracks(track_id)
-        self.recommender_songs = {"song_name": [], "artist_name": [], "duration_time": []}
+        self.recommender_songs = {"song_name": [], "song_uri": [], "artist_name": [], "duration_time": []}
         for i in temp["tracks"]:
             self.recommender_songs["song_name"].append(i["name"])
+            self.recommender_songs["song_uri"].append(i["uri"])
             self.recommender_songs["artist_name"].append(i["artists"][0]["name"])
             self.recommender_songs["duration_time"].append(ms_to_time(i["duration_ms"]))
 

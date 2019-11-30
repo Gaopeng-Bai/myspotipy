@@ -64,7 +64,7 @@ class data_processing:
         with open(self.vocab2id_file, 'rb') as f:
             vocab = cPickle.load(f)
         vocabulary_size = len(vocab)
-        self.stable_size = vocabulary_size
+        self.stable_size = 14130
         word2id = dict(zip(vocab.keys(), vocab.values()))
 
         for i in playlist:

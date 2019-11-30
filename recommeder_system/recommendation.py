@@ -9,7 +9,7 @@
 # @Software: PyCharm
 # Reference:https://github.com/Gaopeng-Bai/myspotipy.git
 
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 import os
 from six.moves import cPickle
 
@@ -30,11 +30,11 @@ class recommendation():
         :param x_label: input y-1 target
         :return: a list of prediction, default 100
         """
-        with tf.compat.v1.Session() as sess:
+        with tf.Session() as sess:
             meta = [fn for fn in os.listdir(self.save_dir + '/' + self.model) if fn.endswith('meta')]
-            saver = tf.compat.v1.train.import_meta_graph(self.save_dir + '/' + self.model + '/' + meta[0])
-            saver.restore(sess, tf.compat.v1.train.latest_checkpoint(self.save_dir + '/' + self.model))
-            graph = tf.compat.v1.get_default_graph()
+            saver = tf.train.import_meta_graph(self.save_dir + '/' + self.model + '/' + meta[0])
+            saver.restore(sess, tf.train.latest_checkpoint(self.save_dir + '/' + self.model))
+            graph = tf.get_default_graph()
             # # input of model
             input_x = graph.get_operation_by_name('x_squences').outputs[0]
             input_x_label = graph.get_operation_by_name('x_label').outputs[0]
@@ -44,8 +44,8 @@ class recommendation():
             train_y = graph.get_operation_by_name('y').outputs[0]
             # train_op = graph.get_operation_by_name('train_op').outputs[0]
             # predict
-            sp_predict = sess.run(prediction, feed_dict={input_x: x, input_x_label: x_label})[0][0]
-            _, predict_number = tf.compat.v1.nn.top_k(sp_predict, k=100)
+            sp_predict = sess.run(prediction, feed_dict={input_x: x, input_x_label: x_label})[0]
+            _, predict_number = tf.nn.top_k(sp_predict, k=100)
             a = sess.run(predict_number)
             return self.convert_id_string(a[:self.k])
 

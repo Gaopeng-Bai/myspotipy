@@ -58,8 +58,8 @@ class Gui_main(ui):
         self.nextsong.clicked.connect(self.play_next_song)
         self.previous_song.clicked.connect(self.play_prev_song)
         self.playsong.clicked.connect(self.play_button)
-        self.thumbdown.clicked.connect(self.positive_recommender)
-        self.thumbup.clicked.connect(self.negative_recommender)
+        self.thumbdown.clicked.connect(self.negative_recommender)
+        self.thumbup.clicked.connect(self.positive_recommender)
 
     def positive_recommender(self):
         self.my_spotify.current_playing_info()
@@ -386,7 +386,7 @@ class Gui_main(ui):
         :param item: the track id be clicked
         :return:
         """
-        self.my_spotify.play_song(item.text)
+        self.my_spotify.play_song(self.my_spotify.recommender_songs["song_uri"][int(item.row())])
 
     def play(self, item):
         """
