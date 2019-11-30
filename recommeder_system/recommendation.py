@@ -15,15 +15,14 @@ from six.moves import cPickle
 
 
 class recommendation():
-    def __init__(self, save_dir="../data_resources/save_data", model="MANN", k=3):
+    def __init__(self, save_dir="../data_resources/save_data", model="MANN"):
         self.MANN_weight_path = os.path.join(save_dir, model)
         save_id2vocab_dir = save_dir + '/' + 'id2word'
         self.id2vocab_file = os.path.join(save_id2vocab_dir, "vocab.pkl")
         self.save_dir = save_dir
         self.model = model
-        self.k = k
 
-    def MANN_predict(self, x, x_label):
+    def MANN_predict(self, x, x_label, k=3):
         """
         predict model that specify in Constructor.
         :param x: input x
@@ -47,7 +46,7 @@ class recommendation():
             sp_predict = sess.run(prediction, feed_dict={input_x: x, input_x_label: x_label})[0]
             _, predict_number = tf.nn.top_k(sp_predict, k=100)
             a = sess.run(predict_number)
-            return self.convert_id_string(a[:self.k])
+            return self.convert_id_string(a[:k])
 
     def convert_id_string(self, value):
         """
@@ -61,5 +60,5 @@ class recommendation():
             vocab = cPickle.load(f)
         word2id = dict(zip(vocab.keys(), vocab.values()))
         for i in value:
-            list.append("spotify:track:"+word2id.get(i))
+            list.append("spotify:track:" + word2id.get(i))
         return list

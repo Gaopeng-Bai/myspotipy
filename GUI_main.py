@@ -31,6 +31,8 @@ class Gui_main(ui):
         self.current_playlist = ''
         self.song_index = 0
         self.songs_num = 0
+        self.numberofrecommender = 3
+        self.song_dont_like = []
         self.current_song_lists = []
         self.my_spotify = spotify_api()
         self.preprocessing = data_processing()
@@ -77,11 +79,22 @@ class Gui_main(ui):
         if self.current_song_lists:
             if self.my_spotify.current_playing_information['song_uri'] is not None:
                 # current song never appear again.
-                QMessageBox.about(None, 'Negative feedback', 'This song never appear again')
+                self.numberofrecommender += 1
+                self.song_dont_like.append(self.my_spotify.current_playing_information['song_uri'])
+                QMessageBox.about(None, 'Negative feedback', 'This song never appear again, please press refresh button')
             else:
                 QMessageBox.about(None, 'No playing info', 'Please play a song and press this button again')
         else:
             QMessageBox.about(None, 'No playlist', 'Please choose a playlist first')
+
+    def remove_song_dont_like(self, item):
+        if item:
+            for i in item:
+                rem = self.my_spotify.recommender_songs["song_uri"].index(i)
+                self.my_spotify.recommender_songs["song_name"].pop(rem)
+                self.my_spotify.recommender_songs["song_uri"].pop(rem)
+                self.my_spotify.recommender_songs["artist_name"].pop(rem)
+                self.my_spotify.recommender_songs["duration_time"].pop(rem)
 
     def play_button(self):
         """
@@ -362,10 +375,11 @@ class Gui_main(ui):
         """
         self.preprocessing.init_container()
         x, x_label, y = self.preprocessing.fetch_batch(self.current_song_lists)
-        recommendation_list = self.recommender_.MANN_predict(x, x_label)
+        recommendation_list = self.recommender_.MANN_predict(x, x_label, k=self.numberofrecommender)
         self.my_spotify.finding_song_by_track(recommendation_list)
         # fill the gui for recommendation list
         self.Recommender.clearContents()
+        self.remove_song_dont_like(self.song_dont_like)
         count = len(self.my_spotify.recommender_songs["song_name"])
         self.Recommender.setRowCount(count)
         for i, item in enumerate(self.my_spotify.recommender_songs["song_name"]):
@@ -386,7 +400,14 @@ class Gui_main(ui):
         :param item: the track id be clicked
         :return:
         """
-        self.my_spotify.play_song(self.my_spotify.recommender_songs["song_uri"][int(item.row())])
+        if self.current_playlist:
+            if hasattr(self, 'avaiable'):
+                self.my_spotify.play_song(self.my_spotify.recommender_songs["song_uri"][int(item.row())])
+                self.gui_bottom_init()
+            else:
+                QMessageBox.warning(None, 'No valid devices', 'Please open your devices')
+        else:
+            QMessageBox.warning(None, 'Null playlist', 'Please pick a playlist first')
 
     def play(self, item):
         """
