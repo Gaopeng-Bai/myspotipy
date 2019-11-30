@@ -7,7 +7,7 @@
 # @File    : recommendation.py
 # @User    : baigaopeng
 # @Software: PyCharm
-# Reference:**********************************************
+# Reference:https://github.com/Gaopeng-Bai/myspotipy.git
 
 import tensorflow as tf
 import os

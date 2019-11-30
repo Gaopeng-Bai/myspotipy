@@ -7,7 +7,7 @@
 # @File    : preprocessing.py
 # @User    : baigaopeng
 # @Software: PyCharm
-# Reference:**********************************************
+# Reference:https://github.com/Gaopeng-Bai/myspotipy.git
 
 import os
 from itertools import repeat
@@ -38,7 +38,7 @@ class data_processing:
     vocab: Optional[Any]
     vocabulary_size: int
 
-    def __init__(self, save_dir='../data_resources/save_data', seq_length=50, batch_size=4, tasks_size=10):
+    def __init__(self, save_dir='../data_resources/save_data', seq_length=50, batch_size=32, tasks_size=10):
         self.vocab2id_file = os.path.join(save_dir, "vocab2id", "vocab.pkl")
         self.id2vocab_file = os.path.join(save_dir, "id2word", "vocab.pkl")
 
@@ -118,19 +118,20 @@ class data_processing:
 
             y_output.append(one_hot_encode(int(y * self.stable_size), self.stable_size))
         # fetch mini-batch from batch table.
-        for i in range(self.batch_size):
-            x, y = x_array[1:, :], np.array(y_output)
-            while len(x) < self.tasks_size:
-                # duplicate list
-                x = [a for item in x for a in repeat(item, 2)]
-                y = [b for item in y for b in repeat(item, 2)]
+        x, y = x_array[1:, :], np.array(y_output)
+        while len(x) < self.batch_size:
+            # duplicate list
+            x = [a for item in x for a in repeat(item, 2)]
+            y = [b for item in y for b in repeat(item, 2)]
 
-            # choice tasks size item.
-            y_out.append(y[-self.tasks_size:])
-            x_out.append(x[-self.tasks_size:])
+        self.x_container = np.array(x)
+        self.y_container = np.array(y)
+        # choice tasks size item.
+        x_out = self.x_container[0:self.batch_size, :]
+        y_out = self.y_container[0:self.batch_size, :]
 
         x_labels = np.concatenate(
-            [np.zeros(shape=[self.batch_size, 1, self.stable_size]), np.array(y_out)[:, :-1, :]], axis=1
+            [np.zeros(shape=[self.batch_size, 1]), np.array(y_out)[:, :-1]], axis=1
         )
 
         return np.array(x_out), x_labels, np.array(y_out)

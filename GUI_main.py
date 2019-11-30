@@ -7,7 +7,7 @@
 # @File    : Gui_main.py
 # @User    : baigaopeng
 # @Software: PyCharm
-# Reference:**********************************************
+# Reference:https://github.com/Gaopeng-Bai/myspotipy.git
 
 import sys
 import threading
@@ -93,7 +93,7 @@ class Gui_main(ui):
             self.playing = not self.playing
             if self.playing:
                 self.playsong.setStyleSheet("border-image: url(:/icon/pause.ico);")
-                self.remote_play()
+                self.remote_play_playlist()
             else:
                 self.my_spotify.stop_play()
                 # kill thread of progress bar
@@ -110,14 +110,14 @@ class Gui_main(ui):
             self.song_index = self.songs_num - 1
         else:
             self.song_index -= 1
-        self.remote_play()
+        self.remote_play_playlist()
 
     def play_next_song(self):
         if self.song_index > self.songs_num - 1:
             self.song_index = 0
         else:
             self.song_index += 1
-        self.remote_play()
+        self.remote_play_playlist()
 
     def bottom_volume_button(self):
         self.volume.setToolTip('Press mute')
@@ -188,8 +188,8 @@ class Gui_main(ui):
 
         self.progressofsong.sliderMoved.connect(self.jump_timer)
 
-        playback_thread = threading.Thread(name='timer_set', target=self.sync_timer_progress_bar)
-        playback_thread.start()
+        timer_thread = threading.Thread(name='timer_set', target=self.sync_timer_progress_bar)
+        timer_thread.start()
 
     def jump_timer(self):
         position = self.progressofsong.value()
@@ -206,16 +206,14 @@ class Gui_main(ui):
 
     def play_playlist_button(self):
         self.playplaylist.setToolTip('Play current playlist')
-        self.playplaylist.clicked.connect(self.remote_play)
+        self.playplaylist.clicked.connect(self.remote_play_playlist)
 
-    def remote_play(self):
+    def remote_play_playlist(self):
         if self.current_playlist:
             uri = self.my_spotify.playlists['uri'][self.my_spotify.playlists['name'].index(self.current_playlist)]
 
             if hasattr(self, 'avaiable'):
-                playback_thread = threading.Thread(name='play_playlist', target=self.my_spotify.play_playlist,
-                                                   args=(uri, self.song_index))
-                playback_thread.start()
+                self.my_spotify.play_playlist(uri, self.song_index)
                 self.gui_bottom_init()
             else:
                 QMessageBox.warning(None, 'No valid devices', 'Please open your devices')
@@ -335,7 +333,10 @@ class Gui_main(ui):
             self.Recommender.setItem(i, 0, title)
             self.Recommender.setItem(i, 1, name)
             self.Recommender.setItem(i, 2, time)
-        self.Recommender.itemDoubleClicked.connect(self.play)
+        self.Recommender.itemDoubleClicked.connect(self.play_single)
+
+    def play_single(self, item):
+        self.my_spotify.play_song(item.text)
 
     def play(self, item):
         """
@@ -344,7 +345,7 @@ class Gui_main(ui):
         @return:
         """
         self.song_index = int(item.row())
-        self.remote_play()
+        self.remote_play_playlist()
 
     def test_function(self):
         self.my_spotify.finding_song_by_track("spotify:track:2vCtiBvJJZfz773yTfAxPP")

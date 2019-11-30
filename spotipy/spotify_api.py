@@ -7,7 +7,7 @@
 # @File    : spotify_api.py
 # @User    : baigaopeng
 # @Software: PyCharm
-# Reference:**********************************************
+# Reference:https://github.com/Gaopeng-Bai/myspotipy.git
 
 import sys, os, json, time
 from typing import Dict, List, Any, Optional, Union
@@ -179,7 +179,6 @@ class spotify_api:
     # device: Smartphone, Computer
     def play_song(self, specific_uri):
         self.sp.start_playback(device_id=self.final_devices_id, uris=[specific_uri])
-        print('playing')
 
     def play_playlist(self, playlist_uri, position):
         self.sp.start_playback(device_id=self.final_devices_id, context_uri=playlist_uri, offset={"position": position})
