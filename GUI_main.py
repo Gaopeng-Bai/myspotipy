@@ -175,6 +175,10 @@ class Gui_main(ui):
             QMessageBox.warning(None, 'Bottom init error', 'No playing on the device')
 
     def progress_bar_with_timer(self):
+        """
+        set progress bar.
+        :return:
+        """
         progress = int(self.my_spotify.current_playing_information['progress_ms'])
         self.duration = int(self.my_spotify.current_playing_information['duration_ms'])
 
@@ -195,6 +199,10 @@ class Gui_main(ui):
         self.my_spotify.seek_to_position(int(position/100*self.duration))
 
     def sync_timer_progress_bar(self):
+        """
+        sync the progress bar by access the data from the remote device.
+        :return:
+        """
         while 1:
             self.my_spotify.current_playing_info()
             progress_ms = self.my_spotify.current_playing_information['progress_ms']
@@ -204,10 +212,18 @@ class Gui_main(ui):
             self.progressofsong.setValue(int((progress_ms / self.duration) * 100))
 
     def play_playlist_button(self):
+        """
+        set the play_playlist button function.
+        :return:
+        """
         self.playplaylist.setToolTip('Play current playlist')
         self.playplaylist.clicked.connect(self.remote_play_playlist)
 
     def remote_play_playlist(self):
+        """
+        remote play a song base on the playlist uri and the position in the playlist.
+        :return:
+        """
         if self.current_playlist:
             uri = self.my_spotify.playlists['uri'][self.my_spotify.playlists['name'].index(self.current_playlist)]
 
@@ -220,11 +236,18 @@ class Gui_main(ui):
             QMessageBox.warning(None, 'Null playlist', 'Please pick a playlist first')
 
     def playlists_init(self):
+        """
+        set the playlist connected function.
+        :return:
+        """
         self.playlists.addItems(self.my_spotify.playlists['name'])
         self.playlists.itemClicked.connect(self.playlist_clicked)
 
     def playlist_contain_init(self):
-        # init the contents of playlist display
+        """
+        init the contents of playlist display
+        :return:
+        """
         self.playlists_details.setColumnCount(3)
         self.playlists_details.verticalHeader().setVisible(False)
         self.playlists_details.setStyleSheet("QHeaderView::section{Background-color:rgb(0,1,1)}")
@@ -236,7 +259,10 @@ class Gui_main(ui):
         self.playlists_details.setSelectionBehavior(QAbstractItemView.SelectRows)
 
     def recommendation_contain_init(self):
-        # init the contents of playlist display
+        """
+        init the contents of recommendation display
+        :return:
+        """
         self.Recommender.setColumnCount(3)
         self.Recommender.verticalHeader().setVisible(False)
         self.Recommender.setStyleSheet("QHeaderView::section{Background-color:rgb(0,1,1)}")
@@ -248,6 +274,11 @@ class Gui_main(ui):
         self.Recommender.setSelectionBehavior(QAbstractItemView.SelectRows)
 
     def playlist_clicked(self, item):
+        """
+        set function on the name of playlist.
+        :param item: which is clicked
+        :return:
+        """
         self.my_spotify.get_playlists_detials(item.text())
 
         self.current_playlist = item.text()
@@ -258,6 +289,10 @@ class Gui_main(ui):
         self.fill_playlist_details()
 
     def fill_playlist_details(self):
+        """
+        fill in playlist table after choose a playlist.
+        :return:
+        """
         self.playlists_details.clearContents()
         self.songs_num = len(self.my_spotify.container['song_name'])
         self.playlists_details.setRowCount(self.songs_num)
@@ -275,8 +310,11 @@ class Gui_main(ui):
 
         self.playlists_details.itemDoubleClicked.connect(self.play)
 
-    # devices button
     def devices_button_init(self):
+        """
+        devices button init.
+        :return:
+        """
         self.devices.setToolTip('Click to get your devices')
         self.devices.setPopupMode(QToolButton.MenuButtonPopup)
         self.devices.setIcon(QIcon('resource/devices.ico'))
@@ -284,6 +322,10 @@ class Gui_main(ui):
         self.devices.clicked.connect(self.devices_button_menu)
 
     def devices_button_menu(self):
+        """
+        set the function of devices choose button.
+        :return:
+        """
         self.my_spotify.show_available_device()
 
         menu = QMenu(self.mainwindow)
@@ -303,6 +345,10 @@ class Gui_main(ui):
             self.devices.setToolTip('No valid devices')
 
     def device_choice_click(self):
+        """
+        initialization after device choose
+        :return:
+        """
         self.my_spotify.choice_device(self.avaiable.text())
         # current playlist initializer
 
@@ -335,12 +381,17 @@ class Gui_main(ui):
         self.Recommender.itemDoubleClicked.connect(self.play_single)
 
     def play_single(self, item):
+        """
+        play single song by track id
+        :param item: the track id be clicked
+        :return:
+        """
         self.my_spotify.play_song(item.text)
 
     def play(self, item):
         """
         Remote play songs follow the current item
-        @param item:
+        @param item: the item in playlist
         @return:
         """
         self.song_index = int(item.row())
