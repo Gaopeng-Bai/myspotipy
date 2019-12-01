@@ -13,7 +13,7 @@ Register Spotify dashboard to get your credentials: <https://developer.spotify.c
 
 Details pls check the documents in <https://spotipy.readthedocs.io/en/latest/>
 
-## 5. Make sure the graph data that generate by Model already exit in ../data_resources/save_data
+## 5. Make sure the graph data that generate by Model already exited in ../data_resources/save_data
 ## 6. Run this application with your Spotify ID.
 
 Login your Spotify client -> Click on your profile photo -> The menu button under your photo. 
