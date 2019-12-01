@@ -13,7 +13,8 @@ Register Spotify dashboard to get your credentials: <https://developer.spotify.c
 
 Details pls check the documents in <https://spotipy.readthedocs.io/en/latest/>
 
-## 5. Run this application with your Spotify ID.
+## 5. Make sure the graph data that generate by Model already exit in ../data_resources/save_data
+## 6. Run this application with your Spotify ID.
 
 Login your Spotify client -> Click on your profile photo -> The menu button under your photo. 
 
@@ -21,6 +22,6 @@ When you're on your account and find your account sharing link, the characters a
 
 Run program: python xxx.py user on the console.  Or set your IDE.
 
-## 6. Authorization. 
+## 7. Authorization. 
 
 The program will jump to the browser with your redirect URL (whatever it is). Copy the URL represent in browser to command line, then press Enter to go.
