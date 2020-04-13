@@ -1,11 +1,11 @@
 # My Spotify Client with MANN recommendation system
 
-# Introduction
+## Introduction
 
 To verify that the [results of this study](https://github.com/Gaopeng-Bai/MANN_model.git) are objective, I use the [spotify python API](href{https://spotipy.readthedocs.io/en/latest/) to build an application (graphical user interface) that contains [MANN](https://arxiv.org/pdf/1605.06065.pdf) algorithms to recommend next song to user. 
 ![avatar](images/app_play_recom.png)
 
-# Requirements
+## Requirements
 
 * Make sure you have Python or Conda installed
 * Install package described in requirement file.
