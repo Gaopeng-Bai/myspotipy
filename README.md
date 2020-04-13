@@ -18,11 +18,11 @@ To verify that the [results of this study](https://github.com/Gaopeng-Bai/MANN_m
 * Set environment variables:
 
     ```
-        SPOTIPY_CLIENT_ID= xxx
+    SPOTIPY_CLIENT_ID= xxx
 
-        SPOTIPY_CLIENT_SECRET= xxx
+    SPOTIPY_CLIENT_SECRET= xxx
         
-        SPOTIPY_REDIRECT_URI='your-app-redirect-url'
+    SPOTIPY_REDIRECT_URI='your-app-redirect-url'
 
     ```
 
